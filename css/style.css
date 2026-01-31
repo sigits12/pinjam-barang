@@ -10,6 +10,12 @@ body {
   padding: 0;
 }
 
+.skeleton-text {
+  display: inline-block;
+  min-width: 120px;
+  color: #aaa;
+}
+
 /* Container utama */
 .container {
   max-width: 420px;

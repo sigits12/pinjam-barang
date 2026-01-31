@@ -9,6 +9,19 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzDcNbRszP5lQUzUwQsS4lq
 const params = new URLSearchParams(window.location.search);
 const barangId = params.get("id");
 
+const cacheKey = "barang_" + barangId;
+const cached = localStorage.getItem(cacheKey);
+
+if (cached) {
+  try {
+    const data = JSON.parse(cached);
+    namaBarangEl.innerText = data.nama_barang;
+    statusBarangEl.innerText = data.status;
+  } catch (e) {
+    localStorage.removeItem(cacheKey);
+  }
+}
+
 // ===============================
 // Elemen HTML
 // ===============================
@@ -36,8 +49,18 @@ if (!barangId) {
 fetch(`${API_URL}?action=getBarang&id=${barangId}`)
   .then(res => res.json())
   .then(data => {
+
+    if (data.error) {
+      statusBarangEl.innerText = "Data tidak ditemukan";
+      return;
+    }
+    
+    // render
     namaBarangEl.innerText = data.nama_barang;
     statusBarangEl.innerText = data.status;
+
+    // simpan cache
+    localStorage.setItem(cacheKey, JSON.stringify(data));
 
     if (data.status === "tersedia") {
       formPinjam.style.display = "block";
@@ -75,6 +98,7 @@ btnPinjam.addEventListener("click", () => {
   .then(res => res.json())
   .then(() => {
     alert("Barang berhasil dipinjam");
+    localStorage.removeItem(cacheKey);
     location.reload();
   })
   .catch(err => {
@@ -97,6 +121,7 @@ btnKembali.addEventListener("click", () => {
   .then(res => res.json())
   .then(() => {
     alert("Barang berhasil dikembalikan");
+    localStorage.removeItem(cacheKey);
     location.reload();
   })
   .catch(err => {
